@@ -1,0 +1,28 @@
+<div class="row col-xs-12">
+    <table class="table table-hover">
+        <tbody>
+        <tr>
+            <th>Name</th>
+            <th>Info</th>
+            <th><span class="glyphicon glyphicon-ok"></span></th>
+            <th><span class="glyphicon glyphicon-remove"></span></th>
+        </tr>
+        <tr ng-repeat="group in ctrl.allGroups">
+            <td ng-bind="group.name" style="width: 55%;"></td>
+            <td ng-bind="group.info" style="width: 55%;"></td>
+            <td style="width: 4%;">
+                <button class="btn btn-primary" ng-click="ctrl.groupUserAdd(group._id , group.name)"
+                        ng-show="!ctrl.checkIfInGroup(group._id)"><span class="glyphicon glyphicon-ok"></span>
+                </button>
+            </td>
+            <td style="width: 4%;">
+                <button class="btn btn-primary" ng-click="ctrl.groupUserRemove(group._id)"
+                        ng-show="ctrl.checkIfInGroup(group._id)"><span class="glyphicon glyphicon-remove"></span>
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+
+</div>
