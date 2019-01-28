@@ -67,7 +67,16 @@ module.exports = {
 				.insert({'user': person_id});
 			
         },
-		
+	getGroupPersons:
+		function (group_id,callback) {
+
+            db.collection(group_id + 'users')
+				.find({})
+				.toArray(function (err, docs) {
+					callback(err || docs.length == 0 ? {} : docs);
+				});
+			
+        },
 	selectGroups:
 		function(callback) {
 			db.collection('groups').find({}).toArray(function(err, docs) {

@@ -3,7 +3,7 @@ var http = require('http');
 var path = require('path');
 var mime = require('mime');
 var Cookies = require('cookies');
-var uu_id = require('uuid');
+var uuid = require('uuid');
 var WebSocket = require('ws');
 
 require('./initialize.js');
@@ -157,13 +157,16 @@ function logOut(req, rep, session) {
 }
 
 function whoAmI(req, rep, session) {
-    rep.writeHead(200, 'Session info', {'Content-Type': 'application/json'});
-    if (!isEmptyObject(session)) {
-        rep.end(JSON.stringify(sessions[session]));
-    } else {
-        rep.end(JSON.stringify({}));
-    }
+	rep.writeHead(200, 'Session info', { 'Content-Type': 'application/json' });
+	if(session) {
+		var sess = sessions[session];
+		sess.id = session;
+		rep.end(JSON.stringify(sess));
+	} else {
+		rep.end(JSON.stringify({}));		
+	}
 }
+
 
 function getGroups(req, rep, session) {
     db.selectGroups(function (groups) {
@@ -282,6 +285,16 @@ function sendGroupMessage(req, rep, session) {
     });
 
 }
+function userBelongToGroup(data ,person_id){
+
+	for (let k in data) {
+		console.log(JSON.stringify(data[k].user) + " compare "+person_id);
+		if(JSON.stringify(data[k].user) === JSON.stringify(person_id)){
+			return true;
+		}
+	}
+	return false;
+}
 
 var httpServer = http.createServer();
 var wsServer = new WebSocket.Server({ server: httpServer });
@@ -293,14 +306,15 @@ httpServer.on('request', function (req, rep) {
         var cookies = new Cookies(req, rep);
         var session = cookies.get('session');
         var now = Date.now();
-        if (!session || !sessions[session]) {
-            session = uu_id();
-            sessions[session] = {created: now, touched: now, login: ''};
-            cookies.set("session", session, {httpOnly: false});
-        } else {
-            sessions[session].touched = now;
-            cookies.set("session", session, {httpOnly: false});
-        }
+		if(!session || !sessions[session]) {
+			session = uuid();
+			sessions[session] = { created: now, touched: now, user: null };
+			cookies.set('session', session, { httpOnly: false });
+			console.log('Creating new session ' + session);
+		} else {
+			sessions[session].touched = now;
+			cookies.set('session', session, { httpOnly: false });
+		}
 
         if (isLoggedIn(session)) {
 			switch (req.url) {
@@ -444,12 +458,14 @@ wsServer.on('connection', function connection(conn) {
 });
 
 function broadcast(session, msg , group_id) {
-	if(debugLog) console.log('Broadcasting: ' + session + ' -> ' + msg);
-	wsServer.clients.forEach(function(client) {
-		if(client.readyState === WebSocket.OPEN ) {
-			if(debugLog) console.log("Sending an event message to client " + client.session + " with data " + msg);
-			client.send(JSON.stringify({ from: sessions[session].firstName + " "  + sessions[session].lastName ,message: msg ,group_id: group_id,}));
-		}
+	if(debugLog) console.log('Broadcasting: ' + ' -> ' + msg);
+	db.getGroupPersons(group_id, function (data) {
+		wsServer.clients.forEach(function(client) {
+			if(client.readyState === WebSocket.OPEN && userBelongToGroup(data ,sessions[session]._id) == true) {
+				if(debugLog) console.log("Sending an event message to client " + sessions[session]._id + " with data " + msg);
+				client.send(JSON.stringify({ from: sessions[session].firstName + " "  + sessions[session].lastName ,message: msg ,group_id: group_id,}));
+			}
+		});
 	});
 }
 httpServer.listen(listeningPort);

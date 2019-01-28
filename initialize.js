@@ -25,10 +25,11 @@ personsExample = [
 groupsExample = [
     {name: 'Informatyka', info: 'Grupa o informatyce'},
     {name: 'Muzyka', info: 'Grupa o muzyce'},
-    {name: 'Gry', info: 'Grupa o grach'}
+    {name: 'Gry', info: 'Grupa o grach'},
+    {name: 'Boks', info: 'Grupa o boksie'},
+    {name: 'Anonimowi Alkoholicy', info: 'Grupa o ...'},
 ];
 
-messagesExample = []
 
 if (debugLog) console.log('Creating new collections');
 
@@ -45,13 +46,3 @@ for (var i in groupsExample) {
     }
     groups.insert(groupsExample[i]);
 }
-
-for (var i in messagesExample) {
-    if (debugLog) {
-        console.log(JSON.stringify(messagesExample[i]));
-    }
-    messages.insert(messagesExample[i]);
-}
-
-
-if (debugLog) console.log('End of initialization');
