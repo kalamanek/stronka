@@ -106,7 +106,7 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
                         $("#loginDialog").modal('hide');
                         self.refreshMenu();
                     } catch (err) {
-                        self.loginMsg = 'Something goes wrong.';
+                        self.loginMsg = 'cannot recive inrfomation about account.';
                         self.loggedUser = '';
                         self.loggedName = '';
                         self.refreshMenu();

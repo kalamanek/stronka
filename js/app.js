@@ -27,6 +27,7 @@ app.factory('ws', ['$websocket', 'globals', function($websocket, globals) {
 			var msg = JSON.parse(message.data);
 			globals.lastMessage.from = msg.from;
 			globals.lastMessage.message = msg.message;
+			globals.lastMessage.group_id = msg.group_id;
 			console.log('Received by ws: ' + JSON.stringify(globals.lastMessage));
 		} catch(err) {
 			console.log('Error during parsing the message from ws: ' + message.data);			

@@ -5,7 +5,7 @@ var mime = require('mime');
 var Cookies = require('cookies');
 var uu_id = require('uuid');
 var WebSocket = require('ws');
-   
+
 require('./initialize.js');
 
 var debugLog = true;
@@ -165,7 +165,7 @@ function whoAmI(req, rep, session) {
     }
 }
 
-function groups(req, rep, session) {
+function getGroups(req, rep, session) {
     db.selectGroups(function (groups) {
         rep.writeHead(200, 'Groups', {'Content-Type': 'application/json'});
         rep.end(JSON.stringify(groups));
@@ -258,7 +258,7 @@ function sendGroupMessage(req, rep, session) {
             if (debugLog) console.log('Trying to send message ' + JSON.stringify(message.text) + ' to group ' + JSON.stringify(message.group_id));
             if (message.text.length > 0 && message.group_id.length > 0 && message.text.length < 100 && message.group_id.length < 30) {
 				
-				broadcast(session, message.text)
+				broadcast(session, message.text , message.group_id)
                 db.insertMessagesOfGroup(sessions[session]._id, message.group_id, message.text, sessions[session].firstName + " " + sessions[session].lastName);
                 rep.writeHead(200, 'Messages send', {'Content-Type': 'application/json'});
                 rep.end(JSON.stringify({message: 'Message has been sent'}));
@@ -325,7 +325,7 @@ httpServer.on('request', function (req, rep) {
 				case '/groups':
 					switch (req.method) {
 						case 'GET':
-							groups(req, rep, session);
+							getGroups(req, rep, session);
 							break;
 						case 'PUT':
 							getGroupMessages(req, rep, session);
@@ -435,12 +435,12 @@ wsServer.on('connection', function connection(conn) {
 	}).on('error', function(err) {});
 });
 
-function broadcast(session, msg) {
+function broadcast(session, msg , group_id) {
 	if(debugLog) console.log('Broadcasting: ' + session + ' -> ' + msg);
 	wsServer.clients.forEach(function(client) {
 		if(client.readyState === WebSocket.OPEN ) {
 			if(debugLog) console.log("Sending an event message to client " + client.session + " with data " + msg);
-			client.send(JSON.stringify({ from: sessions[session].firstName, message: msg }));
+			client.send(JSON.stringify({ from: sessions[session].firstName + " "  + sessions[session].lastName ,message: msg ,group_id: group_id,}));
 		}
 	});
 }

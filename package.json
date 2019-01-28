@@ -10,6 +10,7 @@
     "mime": "^2.0.3",
     "mongojs": "^2.4.1",
     "ngx-infinite-scroll": "^7.0.1",
+    "node-watch": "^0.6.0",
     "password-hash": "^1.2.2",
     "querystring": "^0.2.0",
     "uuid": "^3.1.0",

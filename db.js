@@ -61,7 +61,7 @@ module.exports = {
     personAddGroup:
         function (person_id, group_id, group_name) {
             db.collection('persons')
-				.update({_id: person_id}, {$push: {'groups': {_id : group_id , name : group_name }}});
+				.update({_id: person_id}, {$push: {'groups': {_id : group_id , name : group_name , color: 'black'}}});
 		
             db.collection(group_id + 'users')
 				.insert({'user': person_id});
@@ -89,6 +89,9 @@ module.exports = {
 				.insert({_idperson: person_id,
 					text: text,
 						name: name});
+			
+			 db.collection(group_id + 'users')
+				.update({},{$set:{ seen :false}},{multi:true})
 		}
 			
 }
