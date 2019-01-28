@@ -233,11 +233,19 @@ function getGroupMessages(req, rep, session) {
     }).on('end', function () {
         try {
             var groupToShow = JSON.parse(item);
-            if (debugLog) console.log('asked for messages of group ' + JSON.stringify(groupToShow._id));
-            db.selectMessagesOfGroup(groupToShow._id, function (data) {
-                rep.writeHead(200, 'Messages of group', {'Content-Type': 'application/json'});
-                rep.end(JSON.stringify(data));
-            });
+			if(!groupToShow.amount){
+				if (debugLog) console.log('asked for messages of group ' + JSON.stringify(groupToShow._id));
+				db.selectMessagesOfGroup(groupToShow._id,0, function (data) {
+					rep.writeHead(200, 'Messages of group', {'Content-Type': 'application/json'});
+					rep.end(JSON.stringify(data));
+				});
+			}else{
+				if (debugLog) console.log('asked for messages of group ' + JSON.stringify(groupToShow._id) + "when have already " + JSON.stringify(groupToShow.amount));
+							db.selectMessagesOfGroup(groupToShow._id,groupToShow.amount, function (data) {
+					rep.writeHead(200, 'Messages of group', {'Content-Type': 'application/json'});
+					rep.end(JSON.stringify(data));
+				});
+			}
         } catch (e) {
             if (debugLog) console.log(e);
             rep.writeHead(401, 'Cannot select messages', {'Content-Type': 'application/json'});

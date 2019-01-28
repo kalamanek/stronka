@@ -76,9 +76,12 @@ module.exports = {
 		},
 
     selectMessagesOfGroup:
-        function (group_id, callback) {
+        function (group_id,N, callback) {
             db.collection(group_id+ 'msg')
 			.find({})
+			.sort({ $natural: -1 })
+			.skip(N)
+			.limit(11)
 			.toArray(function (err, docs) {
                 callback(err || docs.length == 0 ? {} : docs);
             });

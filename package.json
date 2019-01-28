@@ -6,6 +6,7 @@
   "dependencies": {
     "angular-websocket": "^2.0.1",
     "cookies": "^0.7.1",
+    "infinite-scroll": "^3.0.5",
     "merge": "^1.2.0",
     "mime": "^2.0.3",
     "mongojs": "^2.4.1",
