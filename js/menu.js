@@ -11,12 +11,13 @@ app.config(['$routeProvider', 'routes', function ($routeProvider, routes) {
     $routeProvider.otherwise({redirectTo: '/'});
 }]);
 
-app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', 'routes',
-    function ($http, $location, $cookies, common, globals, routes) {
+app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', 'routes', 'ws',
+    function ($http, $location, $cookies, common, globals, routes, ws) {
 
-        console.log('Menu controller started');
 
         var self = this;
+		self.lastMessage = globals.lastMessage;
+		
         self.refreshMenu = function () {
 
             self.menu = [];
@@ -27,14 +28,17 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
                 }
             }
         }
-
-        common.getSession(function (session) {
-            globals.session = session;
-            self.loggedUser = session.login;
-            self.loggedName = session.firstName + ' ' + session.lastName;
-            self.refreshMenu();
-        });
-
+		if(!globals.session.id) {
+			common.getSession(function (session) {
+				globals = session;
+				self.loggedUser = session.login;
+				self.loggedName = session.firstName + ' ' + session.lastName;
+				ws.init();
+				self.refreshMenu();
+			});
+		}else{
+			self.loggedUser = session.login;
+		}
         self.navClass = function (page) {
             return page === $location.path() ? 'active' : '';
         }

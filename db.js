@@ -47,14 +47,6 @@ module.exports = {
 					callback(err ||docs[0].lenght == 0 ? {} :  docs[0]);
 				});
 		},
-		
-	selectGroups:
-		function(callback) {
-			db.collection('groups').find({}).toArray(function(err, docs) {
-				callback(err || docs);
-			});
-		},
-
 
 	personRemoveGroup:
         function (person_id, group_id) {
@@ -75,10 +67,17 @@ module.exports = {
 				.insert({'user': person_id});
 			
         },
+		
+	selectGroups:
+		function(callback) {
+			db.collection('groups').find({}).toArray(function(err, docs) {
+				callback(err || docs);
+			});
+		},
 
     selectMessagesOfGroup:
         function (group_id, callback) {
-            db.collection(group_id)
+            db.collection(group_id+ 'msg')
 			.find({})
 			.toArray(function (err, docs) {
                 callback(err || docs.length == 0 ? {} : docs);
@@ -86,7 +85,7 @@ module.exports = {
         },
     insertMessagesOfGroup:
 		function (person_id, group_id, text, name) {
-			db.collection(group_id)
+			db.collection(group_id + 'msg')
 				.insert({_idperson: person_id,
 					text: text,
 						name: name});

@@ -17,9 +17,8 @@ app.controller('Page2', ['$http',
                 }
             );
         }
-       self.getAllGroups();
 
-        self.getUserGroups = function () {
+       self.getUserGroups = function () {
             $http.get('/user/groups').then(
                 function (rep) {
                     try {
@@ -31,7 +30,6 @@ app.controller('Page2', ['$http',
                 }
             );
         }
-       self.getUserGroups();
 
         self.checkIfInGroup = function (_idgroup) {
             for (let k in self.userGroups) {
@@ -69,6 +67,10 @@ app.controller('Page2', ['$http',
                 }
             );
         }
+		
+		
+       self.getAllGroups();
+       self.getUserGroups();
 
     }
 ]);

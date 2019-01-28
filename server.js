@@ -257,6 +257,8 @@ function sendGroupMessage(req, rep, session) {
             var message = JSON.parse(item);
             if (debugLog) console.log('Trying to send message ' + JSON.stringify(message.text) + ' to group ' + JSON.stringify(message.group_id));
             if (message.text.length > 0 && message.group_id.length > 0 && message.text.length < 100 && message.group_id.length < 30) {
+				
+				broadcast(session, message.text)
                 db.insertMessagesOfGroup(sessions[session]._id, message.group_id, message.text, sessions[session].firstName + " " + sessions[session].lastName);
                 rep.writeHead(200, 'Messages send', {'Content-Type': 'application/json'});
                 rep.end(JSON.stringify({message: 'Message has been sent'}));
@@ -274,6 +276,7 @@ function sendGroupMessage(req, rep, session) {
 }
 
 var httpServer = http.createServer();
+var wsServer = new WebSocket.Server({ server: httpServer });
 
 httpServer.on('request', function (req, rep) {
 
@@ -406,8 +409,6 @@ httpServer.on('request', function (req, rep) {
 	}
 );
 
-var wsServer = new WebSocket.Server({ server: httpServer });
-
 wsServer.on('connection', function connection(conn) {
 	
 	if(debugLog) console.log('WebSocket connection initialized');
@@ -437,9 +438,9 @@ wsServer.on('connection', function connection(conn) {
 function broadcast(session, msg) {
 	if(debugLog) console.log('Broadcasting: ' + session + ' -> ' + msg);
 	wsServer.clients.forEach(function(client) {
-		if(client.readyState === WebSocket.OPEN && client.session != session) {
+		if(client.readyState === WebSocket.OPEN ) {
 			if(debugLog) console.log("Sending an event message to client " + client.session + " with data " + msg);
-			client.send(JSON.stringify({ from: session, message: msg }));
+			client.send(JSON.stringify({ from: sessions[session].firstName, message: msg }));
 		}
 	});
 }

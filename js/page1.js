@@ -3,9 +3,8 @@ app.controller('Page1', ['$http',
         var self = this;
 
         self.userGroups = [];
-        self.allGroups = {};
         self.chatMessages = {};
-        self.openedGroup = null;
+        self.currentGroup_id = null;
         self.message = {"text": ""};
 
         self.getUserGroups = function () {
@@ -22,21 +21,12 @@ app.controller('Page1', ['$http',
         }
         self.getUserGroups();
 
-        self.getGroupNameFrom_id = function (_idgroup) {
-            for (let k in self.allGroups) {
-                if (self.allGroups[k]._id === _idgroup) {
-                    return self.allGroups[k].name;
-                }
-            }
-        }
-
-
         self.getChat = function (group_id) {
             $http.put('/groups', {_id: group_id}).then(
                 function (rep) {
                     try {
                         self.chatMessages = rep.data;
-                        self.openedGroup = group_id;
+                        self.currentGroup_id = group_id;
                     } catch (err) {
                     }
                 },
@@ -46,11 +36,10 @@ app.controller('Page1', ['$http',
         }
 
         self.sendMessage = function () {
-            console.log(self.message.text);
-            $http.post('/group/messages', {text: self.message.text, group_id: self.openedGroup}).then(
+            $http.post('/group/messages', {text: self.message.text, group_id: self.currentGroup_id}).then(
                 function (rep) {
                     try {
-                        self.getChat(self.openedGroup);
+                        self.getChat(self.currentGroup_id);
                         self.message.text = "";
                     } catch (err) {
                     }
