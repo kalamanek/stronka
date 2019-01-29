@@ -16,6 +16,7 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
 
 
         var self = this;
+		
 		self.lastMessage = globals.lastMessage;
 		
         self.refreshMenu = function () {
@@ -28,20 +29,21 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
                 }
             }
         }
-		if(!globals.session.id) {
+		
+        self.navClass = function (page) {
+            return page === $location.path() ? 'active' : '';
+        }
+		if(!globals.session._id) {
 			common.getSession(function (session) {
-				globals = session;
+				globals.session._id = session._id;
 				self.loggedUser = session.login;
 				self.loggedName = session.firstName + ' ' + session.lastName;
-				ws.init();
+				ws.init(globals.session._id);
 				self.refreshMenu();
 			});
 		}else{
 			self.loggedUser = session.login;
 		}
-        self.navClass = function (page) {
-            return page === $location.path() ? 'active' : '';
-        }
 
         self.logIn = function () {
             self.loginMsg = '';
@@ -59,6 +61,7 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
                 function (err) {}
             );
             $("#confirmDialog").modal('hide');
+			globals.session = {};
             self.refreshMenu();
         }
 

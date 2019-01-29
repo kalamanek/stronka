@@ -43,6 +43,7 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 						if(self.chatMessages !== 0){
 							self.chatMessages.reverse();
 						}
+						self.messageAmount =0;
 						self.chatMessages.forEach((v,i) =>{
 						self.messageAmount++;
 						});
@@ -147,9 +148,11 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 		function gotoBottom(){
 				scrollElement.scrollTop = scrollElement.scrollHeight - scrollElement.clientHeight;
 		}		
-		webSocket = new WebSocket('ws://' + window.location.host);
+	
 		
-		webSocket.onmessage = function(msg){ // TODO should reply that message seen and change color on server
+		
+									// TODO add event to lastMessage change
+		self.pushMsg = function(){ // TODO should reply that message seen and change color on server
 			if(self.currentGroup._id === self.lastMessage.group_id){
 				addMessageEnd(self.lastMessage.from,self.lastMessage.message);
 				gotoBottom();
@@ -160,7 +163,8 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 					}
 				});
 			}
-		}
+			globals.lastMessage.seen = true;
+		};
 		
     }
 ]);

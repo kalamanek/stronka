@@ -5,12 +5,12 @@ var mime = require('mime');
 var Cookies = require('cookies');
 var uuid = require('uuid');
 var WebSocket = require('ws');
+var fileSystem = require("fs");
+var scope = require('scope');
 
 require('./initialize.js');
 
 var debugLog = true;
-var initDB = true; // set to false to suppress DB initialization
-var listeningPort = 8888;
 var sessions = {};
 
 function serveFile(rep, fileName, errorCode, message) {
@@ -118,12 +118,13 @@ function logIn(req, rep, session) {
     }).on('end', function () {
         try {
             var cred = JSON.parse(item);
-            if (debugLog) console.log('log in ' + JSON.stringify(cred));
+            if (debugLog) console.log('trying to log in ' + JSON.stringify(cred));
             db.checkCredentials(cred, function (user) {
-                if (!isEmptyObject(user)) {
-                    console.log(user);
+                if (user) {
+                    console.log(!isEmptyObject(user));
                     if (session) {
                         sessions[session]._id = user._id;
+                        sessions[session].groups = user.groups;
                         sessions[session].login = cred.login;
                         sessions[session].firstName = user.firstName;
                         sessions[session].lastName = user.lastName;
@@ -148,12 +149,17 @@ function logIn(req, rep, session) {
 }
 
 function logOut(req, rep, session) {
-    if (debugLog) console.log('Destroying session ' + session + ': ' + JSON.stringify(sessions[session]));
-    if (session) {
-        delete sessions[session];
-    }
-    rep.writeHead(301, {Location: '/'});
-    rep.end;
+	if(debugLog) console.log('Destroying session ' + session + ': ' + JSON.stringify(sessions[session]));
+	rep.writeHead(200, 'Session destroyed', { 'Content-Type': 'application/json' });
+	rep.write(JSON.stringify(sessions[session]));
+	if(session) {
+	    if(sessions[session].user) {
+			var user = sessions[session].user;
+			broadcast(session, 'User ' + user.firstName + ' ' + user.lastName + ' logged out');
+	    }
+		delete sessions[session];
+	}
+	rep.end();
 }
 
 function whoAmI(req, rep, session) {
@@ -285,17 +291,17 @@ function sendGroupMessage(req, rep, session) {
     });
 
 }
-function userBelongToGroup(data ,person_id){
-
-	for (let k in data) {
-		console.log(JSON.stringify(data[k].user) + " compare "+person_id);
-		if(JSON.stringify(data[k].user) === JSON.stringify(person_id)){
-			return true;
+function userBelongToGroup(data,client_id){
+		for (let k in data) {
+			console.log(data[k].user + " compare "+client_id);
+			if(JSON.stringify(data[k].user) === JSON.stringify(client_id)){
+				return true;
+			}
 		}
-	}
 	return false;
 }
 
+var listeningPort = 8888;
 var httpServer = http.createServer();
 var wsServer = new WebSocket.Server({ server: httpServer });
 
@@ -449,6 +455,7 @@ wsServer.on('connection', function connection(conn) {
 			}
 			
 		} catch(err) {
+			if(debugLog) console.log('error in ws');
 			rep.error = err;
 		}
 		conn.send(JSON.stringify(rep));
@@ -458,11 +465,10 @@ wsServer.on('connection', function connection(conn) {
 });
 
 function broadcast(session, msg , group_id) {
-	if(debugLog) console.log('Broadcasting: ' + ' -> ' + msg);
 	db.getGroupPersons(group_id, function (data) {
 		wsServer.clients.forEach(function(client) {
-			if(client.readyState === WebSocket.OPEN && userBelongToGroup(data ,sessions[session]._id) == true) {
-				if(debugLog) console.log("Sending an event message to client " + sessions[session]._id + " with data " + msg);
+			if(client.readyState === WebSocket.OPEN && userBelongToGroup(data,client.session) == true) {
+				if(debugLog) console.log("Sending an event message to client " + client.session + " with data " + msg);
 				client.send(JSON.stringify({ from: sessions[session].firstName + " "  + sessions[session].lastName ,message: msg ,group_id: group_id,}));
 			}
 		});
