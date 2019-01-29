@@ -47,6 +47,7 @@ module.exports = {
 					callback(err ||docs[0].lenght == 0 ? {} :  docs[0]);
 				});
 		},
+		
 
 	personRemoveGroup:
         function (person_id, group_id) {
@@ -80,9 +81,32 @@ module.exports = {
         },
 	selectGroups:
 		function(callback) {
-			db.collection('groups').find({}).toArray(function(err, docs) {
-				callback(err || docs);
-			});
+			db.collection('groups')
+				.find({})
+				.toArray(function(err, docs) {
+					callback(err || docs);
+				});
+		},	
+	addGroup:
+		function(group_name , group_info) {
+			db.collection('groups')
+				.insert({name : group_name , info : group_info});
+		},
+	removeGroup:
+		function(group_id) {
+			var ObjectId = require('mongodb').ObjectID;
+			
+			db.collection(group_id + 'users')
+				.drop();
+			
+			//leaving msg! like facebook :)
+			
+			db.collection('groups')
+				.remove({_id : ObjectId(group_id)})
+			
+			db.collection('persons')
+				.update({},{$set:{ seen :false}},{multi:true})
+			
 		},
 
     selectMessagesOfGroup:

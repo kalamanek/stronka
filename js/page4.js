@@ -1,9 +1,11 @@
 app.controller('Page4', ['$http', 'globals', 'ws',
-    function ($http, globals,  ws,$scope) {
+    function ($http, globals,  ws, $scope) {
         var self = this;
 
 		self.groupsUser = {};
 		self.currentGroup = {_id : null ,name:'' }
+		self.addGroup = {};
+		self.addGroupMsg = null;
 		
         self.allGroups = {};
 
@@ -60,6 +62,43 @@ app.controller('Page4', ['$http', 'globals', 'ws',
 					return;
                 }
             }
+		}
+		self.removeGroupFromList = function(group_id){
+			for (let k in self.allGroups) {
+                if (self.allGroups[k]._id === group_id) {
+                    self.allGroups.splice(k, 1);
+					return;
+                }
+            }
+		}
+		self.addGroupModal = function(){//TODO make sure not empty
+			$http.put('/admin/group', {name: self.addGroup.name , info: self.addGroup.info}).then(
+				function (rep) {
+					try {
+						console.log(rep.data);
+						self.addGroup = {};
+						self.addGroupMsg = null;
+                        $("#addGroup").modal('hide');
+						
+					} catch (err) {
+					}
+				},
+				function (err) {
+					self.addGroupMsg = 'cannot add group';
+			});
+		}
+		self.removeGroup = function(group_id){
+			console.log(group_id);
+			$http.post('/admin/group', {_id: group_id}).then(
+				function (rep) {
+					try {
+						console.log(rep.data);
+						self.removeGroupFromList(group_id);
+					} catch (err) {
+					}
+				},
+				function (err) {
+			});
 		}
 	}
 ]);

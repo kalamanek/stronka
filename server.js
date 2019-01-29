@@ -42,8 +42,8 @@ function serveError(rep, error, message) {
 var db = require('./db.js');
 
 function isEmptyObject(obj) {
-    for (var key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+    for (var k in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, k)) {
             return false;
         }
     }
@@ -121,7 +121,7 @@ function logIn(req, rep, session) {
             var cred = JSON.parse(item);
             if (debugLog) console.log('trying to log in ' + JSON.stringify(cred));
             db.checkCredentials(cred, function (user) {
-                if (user) {
+                if (!isEmptyObject(user)) {
                     if (session) {
                         sessions[session]._id = user._id;
                         sessions[session].groups = user.groups;
@@ -181,6 +181,27 @@ function getGroups(req, rep, session) {
         rep.end(JSON.stringify(groups));
     });
 }
+function addGroup(req, rep, session) {
+	var item = '';
+    req.setEncoding('utf8');
+    req.on('data', function (chunk) {
+        item += chunk;
+    }).on('end', function () {
+        try {
+            var group = JSON.parse(item);
+            if (debugLog) console.log('Trying to add group ' +JSON.stringify(group));
+
+            db.addGroup(group.name, group.info);
+            rep.writeHead(200, 'add group', {'Content-Type': 'application/json'});
+            rep.end(JSON.stringify({message: 'succesfull'}));
+        } catch (e) {
+            if (debugLog) console.log(e);
+            rep.writeHead(401, 'group', {'Content-Type': 'application/json'});
+            rep.end(JSON.stringify({message: 'declined'}));
+        }
+
+    });
+}
 
 function userGetGroups(req, rep, session) {
     db.selectUser(sessions[session]._id, function (user) {
@@ -193,10 +214,10 @@ function userRemoveFromGroup(req, rep, session) {
     var item = '';
     req.setEncoding('utf8');
     req.on('data', function (chunk) {
-        console.log(chunk);
         item += chunk;
     }).on('end', function () {
         try {
+			console.log(JSON.parse(item));
             var groupToDelete = JSON.parse(item);
             if (debugLog) console.log('Trying to delete user ' + sessions[session]._id +'from group ' + JSON.stringify(groupToDelete._id));
 
@@ -211,6 +232,28 @@ function userRemoveFromGroup(req, rep, session) {
 
     });
 }
+function removeGroup(req, rep, session) {
+    var item = '';
+    req.setEncoding('utf8');
+    req.on('data', function (chunk) {
+        item += chunk;
+    }).on('end', function () {
+        try {
+            var groupToDelete = JSON.parse(item);
+            if (debugLog) console.log('Trying to delete group ' + JSON.stringify(groupToDelete));
+
+            db.removeGroup(groupToDelete._id);
+            rep.writeHead(200, 'Delete group', {'Content-Type': 'application/json'});
+            rep.end(JSON.stringify({message: 'Succesfull'}));
+        } catch (e) {
+            if (debugLog) console.log(e);
+            rep.writeHead(401, 'Cannot delete group', {'Content-Type': 'application/json'});
+            rep.end(JSON.stringify({message: 'Cannot delete group'}));
+        }
+
+    });
+}
+
 
 function adminRemoveUserFromGroup(req, rep, session) {
     var item = '';
@@ -445,6 +488,18 @@ httpServer.on('request', function (req, rep) {
 					switch (req.method) {
 						case 'PUT':
 							adminRemoveUserFromGroup(req, rep, session);
+							break;
+						default:
+							serveError(rep, 405, 'Method not allowed');
+					}
+					break;
+				case '/admin/group': // TODO make sure its admin 
+					switch (req.method) {
+						case 'PUT':
+							addGroup(req, rep, session);
+							break;
+						case 'POST':
+							removeGroup(req, rep, session);
 							break;
 						default:
 							serveError(rep, 405, 'Method not allowed');
