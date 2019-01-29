@@ -476,33 +476,39 @@ httpServer.on('request', function (req, rep) {
 					}
 					break;
 				case '/admin/groupusers': // TODO make sure its admin
-					switch (req.method) {
-						case 'PUT':
-							getTableUsers(req, rep, session);
-							break;
-						default:
-							serveError(rep, 405, 'Method not allowed');
+					if(sessions[session].role === 'Admin'){
+						switch (req.method) {
+							case 'PUT':
+								getTableUsers(req, rep, session);
+								break;
+							default:
+								serveError(rep, 405, 'Method not allowed');
+						}
 					}
 					break;
 				case '/admin/removeuserfromgroup': // TODO make sure its admin
-					switch (req.method) {
-						case 'PUT':
-							adminRemoveUserFromGroup(req, rep, session);
-							break;
-						default:
-							serveError(rep, 405, 'Method not allowed');
+					if(sessions[session].role === 'Admin'){
+						switch (req.method) {
+							case 'PUT':
+								adminRemoveUserFromGroup(req, rep, session);
+								break;
+							default:
+								serveError(rep, 405, 'Method not allowed');
+						}
 					}
 					break;
 				case '/admin/group': // TODO make sure its admin 
-					switch (req.method) {
-						case 'PUT':
-							addGroup(req, rep, session);
-							break;
-						case 'POST':
-							removeGroup(req, rep, session);
-							break;
-						default:
-							serveError(rep, 405, 'Method not allowed');
+					if(sessions[session].role === 'Admin'){
+						switch (req.method) {
+							case 'PUT':
+								addGroup(req, rep, session);
+								break;
+							case 'POST':
+								removeGroup(req, rep, session);
+								break;
+							default:
+								serveError(rep, 405, 'Method not allowed');
+						}
 					}
 					break;
 				default:
