@@ -18,7 +18,7 @@ groups.drop();
 //messages.drop();
 
 personsExample = [
-    {firstName: 'Piotr', lastName: 'Kluska', email: 'q', password: 'q', groups: [] , roles: 'A'},
+    {firstName: 'Piotr', lastName: 'Kluska', email: 'q', password: 'q', groups: [] , role: 'Admin'},
     {firstName: 'Bartek', lastName: 'Kluska', email: 'a', password: 'a', groups: []}
 ];
 

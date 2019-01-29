@@ -50,21 +50,22 @@ module.exports = {
 
 	personRemoveGroup:
         function (person_id, group_id) {
+			var ObjectId = require('mongodb').ObjectID;
             db.collection('persons')
-				.update({_id: person_id},
+				.update({_id: ObjectId(person_id)},
 					{$pull: {'groups': {'_id' : group_id}}});
 			
             db.collection(group_id + 'users')
-				.remove({'user': person_id});
+				.remove({'_id': ObjectId(person_id)});
         },
 
     personAddGroup:
-        function (person_id, group_id, group_name) {
+        function (person, group_id, group_name) {
             db.collection('persons')
-				.update({_id: person_id}, {$push: {'groups': {_id : group_id , name : group_name , color: 'black'}}});
+				.update({_id: person._id}, {$push: {'groups': {_id : group_id , name : group_name , color: 'black'}}});
 		
             db.collection(group_id + 'users')
-				.insert({'user': person_id});
+				.insert({'_id':person._id , firstName : person.firstName , lastName : person.lastName});
 			
         },
 	getGroupPersons:

@@ -26,6 +26,7 @@ app.controller('Page1', ['$http', 'globals', 'ws',
         self.getUserGroups();
 
         self.getChat = function (group_id) {
+			
 			var Table = document.getElementById("table");
 			$("#table tr").remove(); 
 			self.userGroups.forEach((v, i) => {
@@ -38,6 +39,7 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 			
 				function (rep) {
 					try {
+						console.log(rep.data);
 						self.chatMessages = rep.data;
 						self.currentGroup._id = group_id;
 						if(self.chatMessages !== 0){
@@ -47,18 +49,19 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 						self.chatMessages.forEach((v,i) =>{
 						self.messageAmount++;
 						});
+						//TODO go to bottom when document ready
 					} catch (err) {
 					}
 				},
 				function (err) {
 				}
 				);
+				//chat name
 				self.userGroups.forEach((v, i) => {
 					if(self.userGroups[i]._id === group_id){
 						self.currentGroup.name = self.userGroups[i].name;
-				}
-			});
-			
+					}
+				});
         };
 		self.reqChat = function (group_id){
 			$http.put('/groups', {_id: group_id , amount : self.messageAmount}).then(
@@ -66,7 +69,6 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 				function (rep) {
 					try {
 						self.messageHolder = rep.data;
-						console.log(self.messageHolder );
 						self.messageHolder.forEach((v,i) =>{
 							addMessageStart(self.messageHolder[i].name,self.messageHolder[i].text);
 						});

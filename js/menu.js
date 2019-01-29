@@ -1,7 +1,8 @@
 app.constant('routes', [
     {route: '/', templateUrl: 'html/home.html', controller: 'Home', controllerAs: 'ctrl', onlyLoggedIn: false},
     {route: '/1',templateUrl: 'html/page1.html',controller: 'Page1',controllerAs: 'ctrl',menu: 'Current active Chats',onlyLoggedIn: true},
-    {route: '/2',templateUrl: 'html/page2.html',controller: 'Page2',controllerAs: 'ctrl',menu: 'add/remove chat',onlyLoggedIn: true}
+    {route: '/2',templateUrl: 'html/page2.html',controller: 'Page2',controllerAs: 'ctrl',menu: 'add/remove chat',onlyLoggedIn: true},
+    {route: '/4',templateUrl: 'html/page4.html',controller: 'Page4',controllerAs: 'ctrl',menu: 'Admin manage chat',onlyLoggedIn: true, showFor: 'Admin'}
 ]);
 
 app.config(['$routeProvider', 'routes', function ($routeProvider, routes) {
@@ -18,13 +19,35 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
         var self = this;
 		
 		self.lastMessage = globals.lastMessage;
+			
+		self.getSession = function (){
+		if(!globals.session._id) {
+			common.getSession(function (session) {
+				globals.session._id = session._id;
+				self.loggedUser = session.login;
+				self.loggedName = session.firstName + ' ' + session.lastName;
+				self.role = session.role;
+				ws.init(globals.session._id);
+				self.refreshMenu();
+				});
+			}else{
+				self.loggedUser = session.login;
+			}
+		}
+		self.getSession();
+		self.hasRights = function (rights){
+			if(self.role === rights){
+				return true;
+			}
+			return false
+		}
 		
         self.refreshMenu = function () {
 
             self.menu = [];
 
             for (var i in routes) {
-                if (routes[i].menu && (self.loggedUser || !routes[i].onlyLoggedIn)) {
+                if (routes[i].menu && (self.loggedUser || !routes[i].onlyLoggedIn) && ( !routes[i].hasOwnProperty('showFor') || self.hasRights(routes[i].showFor) )){
                     self.menu.push({route: routes[i].route, title: routes[i].menu});
                 }
             }
@@ -34,21 +57,7 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
             return page === $location.path() ? 'active' : '';
         }
 
-	
-		self.getSession = function (){
-		if(!globals.session._id) {
-			common.getSession(function (session) {
-				globals.session._id = session._id;
-				self.loggedUser = session.login;
-				self.loggedName = session.firstName + ' ' + session.lastName;
-				ws.init(globals.session._id);
-				self.refreshMenu();
-				});
-			}else{
-				self.loggedUser = session.login;
-			}
-		}
-		self.getSession();
+
 		
         self.logIn = function () {
             self.loginMsg = '';

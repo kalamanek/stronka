@@ -44,7 +44,6 @@ app.controller('Page2', ['$http',
             $http.post('/user/groups', {_id: _idgroup}).then(
                 function (rep) {
                     try {
-                        self.getAllGroups();
                         self.getUserGroups();
                     } catch (err) {
                     }
