@@ -33,6 +33,9 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
         self.navClass = function (page) {
             return page === $location.path() ? 'active' : '';
         }
+
+	
+		self.getSession = function (){
 		if(!globals.session._id) {
 			common.getSession(function (session) {
 				globals.session._id = session._id;
@@ -40,11 +43,13 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
 				self.loggedName = session.firstName + ' ' + session.lastName;
 				ws.init(globals.session._id);
 				self.refreshMenu();
-			});
-		}else{
-			self.loggedUser = session.login;
+				});
+			}else{
+				self.loggedUser = session.login;
+			}
 		}
-
+		self.getSession();
+		
         self.logIn = function () {
             self.loginMsg = '';
             self.login = '';
@@ -107,6 +112,7 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
                         self.loggedUser = rep.data.email;
                         self.loggedName = rep.data.firstName + ' ' + rep.data.lastName;
                         $("#loginDialog").modal('hide');
+						self.getSession();
                         self.refreshMenu();
                     } catch (err) {
                         self.loginMsg = 'cannot recive inrfomation about account.';
