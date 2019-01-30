@@ -191,9 +191,10 @@ function addGroup(req, rep, session) {
             var group = JSON.parse(item);
             if (debugLog) console.log('Trying to add group ' +JSON.stringify(group));
 
-            db.addGroup(group.name, group.info);
+            db.addGroup(group.name, group.info , function(data){
             rep.writeHead(200, 'add group', {'Content-Type': 'application/json'});
-            rep.end(JSON.stringify({message: 'succesfull'}));
+            rep.end(JSON.stringify(data));
+			});
         } catch (e) {
             if (debugLog) console.log(e);
             rep.writeHead(401, 'group', {'Content-Type': 'application/json'});
@@ -389,10 +390,56 @@ function userBelongToGroup(data,client_id){
 		}
 	return false;
 }
+function getAllUsers(req, rep, session){
+	db.selectAllUsers(function (users) {
+        rep.writeHead(200, 'users', {'Content-Type': 'application/json'});
+        rep.end(JSON.stringify(users));
+    });
+}
 
 var listeningPort = 8888;
 var httpServer = http.createServer();
 var wsServer = new WebSocket.Server({ server: httpServer });
+
+function changeUser(req, rep, session){
+	
+	var item = '';
+    req.setEncoding('utf8');
+    req.on('data', function (chunk) {
+        console.log(chunk);
+        item += chunk;
+    }).on('end', function () {
+        try {
+            var user = JSON.parse(item);
+            if (debugLog) console.log('update user' + JSON.stringify(user));
+
+            db.updateUser(user);
+			if(user._id ===sessions[session]._id){
+				if(debugLog) console.log('Destroying session ' + session + ': ' + JSON.stringify(sessions[session]));
+				if(session) {
+					if(sessions[session].user) {
+						var user = sessions[session].user;
+						broadcast(session, 'User ' + user.firstName + ' ' + user.lastName + ' logged out');
+					}
+					delete sessions[session];
+				}
+			}
+			
+            rep.writeHead(200, 'user set sucessfull', {'Content-Type': 'application/json'});
+            rep.end(JSON.stringify(user));
+        } catch (e) {
+            if (debugLog) console.log(e);
+            rep.writeHead(401, 'something wrong', {'Content-Type': 'application/json'});
+            rep.end(JSON.stringify(user));
+        }
+
+    });
+}
+function isAdmin(session){
+	if(sessions[session].hasOwnProperty('role') && sessions[session].role == 'Admin')
+		return true;
+	return false;
+}
 
 httpServer.on('request', function (req, rep) {
 
@@ -476,7 +523,7 @@ httpServer.on('request', function (req, rep) {
 					}
 					break;
 				case '/admin/groupusers': // TODO make sure its admin
-					if(sessions[session].role === 'Admin'){
+					if(isAdmin(session)){
 						switch (req.method) {
 							case 'PUT':
 								getTableUsers(req, rep, session);
@@ -486,8 +533,19 @@ httpServer.on('request', function (req, rep) {
 						}
 					}
 					break;
+				case '/admin/changeUser': // TODO make sure its admin
+					if(isAdmin(session)){
+						switch (req.method) {
+							case 'POST':
+								changeUser(req, rep, session);
+								break;
+							default:
+								serveError(rep, 405, 'Method not allowed');
+						}
+					}
+					break;
 				case '/admin/removeuserfromgroup': // TODO make sure its admin
-					if(sessions[session].role === 'Admin'){
+					if(isAdmin(session)){
 						switch (req.method) {
 							case 'PUT':
 								adminRemoveUserFromGroup(req, rep, session);
@@ -497,8 +555,19 @@ httpServer.on('request', function (req, rep) {
 						}
 					}
 					break;
+				case '/admin/allusers': // TODO make sure its admin
+					if(isAdmin(session)){
+						switch (req.method) {
+							case 'GET':
+								getAllUsers(req, rep, session);
+								break;
+							default:
+								serveError(rep, 405, 'Method not allowed');
+						}
+					}
+					break;
 				case '/admin/group': // TODO make sure its admin 
-					if(sessions[session].role === 'Admin'){
+					if(isAdmin(session)){
 						switch (req.method) {
 							case 'PUT':
 								addGroup(req, rep, session);

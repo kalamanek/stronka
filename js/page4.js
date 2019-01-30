@@ -85,14 +85,13 @@ app.controller('Page4', ['$http', 'globals', 'ws',
 				},
 				function (err) {
 					self.addGroupMsg = 'cannot add group';
-			});
+			}).then(self.getAllGroups());
 		}
 		self.removeGroup = function(group_id){
 			console.log(group_id);
 			$http.post('/admin/group', {_id: group_id}).then(
 				function (rep) {
 					try {
-						console.log(rep.data);
 						self.removeGroupFromList(group_id);
 					} catch (err) {
 					}

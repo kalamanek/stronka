@@ -47,7 +47,31 @@ module.exports = {
 					callback(err ||docs[0].lenght == 0 ? {} :  docs[0]);
 				});
 		},
+				
+	selectAllUsers:
+		function(callback) {
+			db.collection('persons')
+				.find()
+				.toArray(function(err, docs) {
+					callback(err ||docs[0].lenght == 0 ? {} :  docs);
+				});
+		},
 		
+	updateUser:
+		function(user){
+		var ObjectId = require('mongodb').ObjectID;
+		 db.collection('persons')
+				.remove({_id: ObjectId(user._id)});
+			
+		db.collection('persons')
+			.insert({ firstName: user.firstName,
+				lastName: user.lastName,
+				email: user.email,
+				password: user.password ,
+				groups: user.groups ,
+				role: user.role});
+
+	},
 
 	personRemoveGroup:
         function (person_id, group_id) {
@@ -88,9 +112,15 @@ module.exports = {
 				});
 		},	
 	addGroup:
-		function(group_name , group_info) {
+		function(group_name , group_info , callback) {
 			db.collection('groups')
 				.insert({name : group_name , info : group_info});
+			db.collection('groups')
+				.find({name : group_name , info : group_info})
+				.toArray(function(err, docs) {
+					callback(err || docs.length == 0 ? {} : docs[0]);
+				});
+			
 		},
 	removeGroup:
 		function(group_id) {
@@ -103,9 +133,11 @@ module.exports = {
 			
 			db.collection('groups')
 				.remove({_id : ObjectId(group_id)})
+				
+			 db.collection('persons')
+				.update({},
+					{$pull: {'groups': {'_id' : group_id}}});
 			
-			db.collection('persons')
-				.update({},{$set:{ seen :false}},{multi:true})
 			
 		},
 

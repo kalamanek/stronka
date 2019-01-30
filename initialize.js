@@ -9,13 +9,11 @@ var db = mongojs(dbName);
 
 var persons = db.collection('persons');
 var groups = db.collection('groups');
-var messages = db.collection('messages');
 
 if (debugLog) console.log('Delete collections');
 
 persons.drop();
 groups.drop();
-//messages.drop();
 
 personsExample = [
     {firstName: 'Piotr', lastName: 'Kluska', email: 'q', password: 'q', groups: [] , role: 'Admin'},

@@ -2,6 +2,7 @@ app.constant('routes', [
     {route: '/', templateUrl: 'html/home.html', controller: 'Home', controllerAs: 'ctrl', onlyLoggedIn: false},
     {route: '/1',templateUrl: 'html/page1.html',controller: 'Page1',controllerAs: 'ctrl',menu: 'Current active Chats',onlyLoggedIn: true},
     {route: '/2',templateUrl: 'html/page2.html',controller: 'Page2',controllerAs: 'ctrl',menu: 'add/remove chat',onlyLoggedIn: true},
+    {route: '/3',templateUrl: 'html/page3.html',controller: 'Page3',controllerAs: 'ctrl',menu: 'Admin manage users',onlyLoggedIn: true, showFor: 'Admin'},
     {route: '/4',templateUrl: 'html/page4.html',controller: 'Page4',controllerAs: 'ctrl',menu: 'Admin manage chat',onlyLoggedIn: true, showFor: 'Admin'}
 ]);
 

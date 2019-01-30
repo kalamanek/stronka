@@ -47,7 +47,7 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 						}
 						self.messageAmount =0;
 						self.chatMessages.forEach((v,i) =>{
-						self.messageAmount++;
+							self.messageAmount++;
 						});
 						//TODO go to bottom when document ready
 					} catch (err) {
@@ -55,14 +55,19 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 				},
 				function (err) {
 				}
-				);
-				//chat name
-				self.userGroups.forEach((v, i) => {
-					if(self.userGroups[i]._id === group_id){
-						self.currentGroup.name = self.userGroups[i].name;
-					}
-				});
+			);
+			self.getChatName(group_id);
         };
+		
+		self.getChatName = function (group_id){	
+			for (let i in self.userGroups) {
+					console.log(self.userGroups[i]._id + " "+ self.currentGroup._id)
+				if(self.userGroups[i]._id === group_id){
+					self.currentGroup.name = self.userGroups[i].name;
+				}
+			}
+		}
+		
 		self.reqChat = function (group_id){
 			$http.put('/groups', {_id: group_id , amount : self.messageAmount}).then(
 			
@@ -153,7 +158,6 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 	
 		
 		
-									// TODO add event to lastMessage change
 		self.pushMsg = function(){ // TODO should reply that message seen and change color on server
 			if(self.currentGroup._id === self.lastMessage.group_id){
 				addMessageEnd(self.lastMessage.from,self.lastMessage.message);
