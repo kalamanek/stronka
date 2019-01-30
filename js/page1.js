@@ -39,7 +39,6 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 			
 				function (rep) {
 					try {
-						console.log(rep.data);
 						self.chatMessages = rep.data;
 						self.currentGroup._id = group_id;
 						if(self.chatMessages !== 0){
@@ -61,8 +60,7 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 		
 		self.getChatName = function (group_id){	
 			for (let i in self.userGroups) {
-					console.log(self.userGroups[i]._id + " "+ self.currentGroup._id)
-				if(self.userGroups[i]._id === group_id){
+				if(self.userGroups[i]._id == group_id){
 					self.currentGroup.name = self.userGroups[i].name;
 				}
 			}
@@ -117,6 +115,7 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 			r.appendChild(cb);
 			self.messageAmount++ ;
 			$("#table").append(r);
+			self.gotoBottom();
 		};
 
 		function addMessageStart(a,b){
@@ -137,6 +136,7 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 			r.appendChild(cb);
 			self.messageAmount++ ;
 			$("#table").prepend(r);
+			self.gotoBottom();
 		};
 
 		var scrollElement = document.getElementById("scrollElement");
@@ -152,7 +152,7 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 		
 		
 		
-		function gotoBottom(){
+		self.gotoBottom = function(){
 				scrollElement.scrollTop = scrollElement.scrollHeight - scrollElement.clientHeight;
 		}		
 	
@@ -161,7 +161,7 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 		self.pushMsg = function(){ // TODO should reply that message seen and change color on server
 			if(self.currentGroup._id === self.lastMessage.group_id){
 				addMessageEnd(self.lastMessage.from,self.lastMessage.message);
-				gotoBottom();
+				self.gotoBottom();
 			}else{
 				self.userGroups.forEach((v, i) => {
 					if(self.userGroups[i]._id === self.lastMessage.group_id){

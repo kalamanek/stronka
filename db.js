@@ -61,17 +61,16 @@ module.exports = {
 		function(user){
 		var ObjectId = require('mongodb').ObjectID;
 		 db.collection('persons')
-				.remove({_id: ObjectId(user._id)});
-			
-		db.collection('persons')
-			.insert({ firstName: user.firstName,
-				lastName: user.lastName,
-				email: user.email,
-				password: user.password ,
-				groups: user.groups ,
-				role: user.role});
+				.update({_id: ObjectId(user._id)}, {$set: {
+					firstName: user.firstName,
+					lastName: user.lastName,
+					email: user.email,
+					password: user.password ,
+					groups: user.groups ,
+					role: user.role
+				}})
+		},
 
-	},
 
 	personRemoveGroup:
         function (person_id, group_id) {
@@ -94,10 +93,18 @@ module.exports = {
     personAddGroup:
         function (person, group_id, group_name) {
             db.collection('persons')
-				.update({_id: person._id}, {$push: {'groups': {_id : group_id , name : group_name , color: 'black'}}});
+				.update({_id: person._id}, {$push: {'groups': {
+					_id : group_id ,
+					name : group_name ,
+					color: 'black'
+					}}});
 		
             db.collection(group_id + 'users')
-				.insert({'_id':person._id , firstName : person.firstName , lastName : person.lastName});
+				.insert({
+					'_id':person._id ,
+					firstName : person.firstName ,
+					lastName : person.lastName
+					});
 			
         },
 	getGroupPersons:
