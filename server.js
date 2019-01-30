@@ -56,7 +56,7 @@ function isEmpty(str) {
 
 function isLoggedIn(session) {
     if (session) {
-        if (!isEmpty(sessions[session]._id)) {
+        if (sessions[session].hasOwnProperty('_id') && !isEmpty(sessions[session]._id)) {
             return true;
         }
     }
@@ -414,7 +414,9 @@ function changeUser(req, rep, session){
             if (debugLog) console.log('update user' + JSON.stringify(user));
 
             db.updateUser(user);
-			if(user._id ===sessions[session]._id){
+			
+            if (debugLog) console.log(JSON.stringify(user._id) + 'compare session' + JSON.stringify(sessions[session]._id));
+			if(user._id == sessions[session]._id){
 				if(debugLog) console.log('Destroying session ' + session + ': ' + JSON.stringify(sessions[session]));
 				if(session) {
 					if(sessions[session].user) {
@@ -431,6 +433,39 @@ function changeUser(req, rep, session){
             if (debugLog) console.log(e);
             rep.writeHead(401, 'something wrong', {'Content-Type': 'application/json'});
             rep.end(JSON.stringify(user));
+        }
+
+    });
+}
+
+function  deleteUser(req, rep, session){
+	var item = '';
+    req.setEncoding('utf8');
+    req.on('data', function (chunk) {
+        console.log(chunk);
+        item += chunk;
+    }).on('end', function () {
+        try {
+            var user = JSON.parse(item);
+            if (debugLog) console.log('Trying to delete  user ' + JSON.stringify(user));
+
+            db.removeUser(user._id);
+			if(user._id == sessions[session]._id){
+				if(debugLog) console.log('Destroying session ' + session + ': ' + JSON.stringify(sessions[session]));
+				if(session) {
+					if(sessions[session].user) {
+						var user = sessions[session].user;
+						broadcast(session, 'User ' + user.firstName + ' ' + user.lastName + ' logged out');
+					}
+					delete sessions[session];
+				}
+			}
+            rep.writeHead(200, 'Delete user', {'Content-Type': 'application/json'});
+            rep.end(JSON.stringify({message: 'You have removed this person'}));
+        } catch (e) {
+            if (debugLog) console.log(e);
+            rep.writeHead(401, 'Cannot delete user', {'Content-Type': 'application/json'});
+            rep.end(JSON.stringify({message: 'Cannot delete user '}));
         }
 
     });
@@ -538,6 +573,9 @@ httpServer.on('request', function (req, rep) {
 						switch (req.method) {
 							case 'POST':
 								changeUser(req, rep, session);
+								break;
+							case 'PUT':
+								deleteUser(req, rep, session);
 								break;
 							default:
 								serveError(rep, 405, 'Method not allowed');
@@ -658,7 +696,7 @@ wsServer.on('connection', function connection(conn) {
 function broadcast(session, msg , group_id) {
 	db.getGroupPersons(group_id, function (data) {
 		wsServer.clients.forEach(function(client) {
-			if(client.readyState === WebSocket.OPEN && userBelongToGroup(data,client.session) == true) {
+			if(client.readyState === WebSocket.OPEN && userBelongToGroup(data, client.session) == true) {
 				if(debugLog) console.log("Sending an event message to client " + client.session + " with data " + msg);
 				client.send(JSON.stringify({ from: sessions[session].firstName + " "  + sessions[session].lastName ,message: msg ,group_id: group_id,}));
 			}

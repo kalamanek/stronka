@@ -3,7 +3,7 @@ app.controller('Page3', ['$http', 'globals', 'ws',
         var self = this;
 
         self.allUsers = [];
-
+		self.userChange = {};
         self.getAllUsers = function () {
             $http.get('/admin/allusers').then(
                 function (rep) {
@@ -27,10 +27,23 @@ app.controller('Page3', ['$http', 'globals', 'ws',
 			self.updateUser(user);
 		}	
 		self.removeUser = function(user){
-			
+			$http.put('/admin/changeUser', user).then(
+                function (rep) {
+                    try {
+						console.log(rep);
+                    } catch (err) {
+                    }
+                },
+                function (err) {
+                }).then(self.getAllUsers());
 		}
 		self.changeUser = function(user){
-			
+			$('#changeUser').modal('show');
+			self.userChange = user;
+		}
+		self.pushUser = function (){
+			self.updateUser(self.userChange);
+			$('#changeUser').modal('hide');
 		}
 		self.updateUser = function(user){
 			console.log(user);
@@ -38,6 +51,9 @@ app.controller('Page3', ['$http', 'globals', 'ws',
                 function (rep) {
                     try {
 						console.log(rep);
+						if(user._id == globals.session._id){
+							window.location.reload(false);
+						}
                     } catch (err) {
                     }
                 },

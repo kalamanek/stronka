@@ -83,6 +83,13 @@ module.exports = {
             db.collection(group_id + 'users')
 				.remove({'_id': ObjectId(person_id)});
         },
+	removeUser:
+        function (person_id) {
+			var ObjectId = require('mongodb').ObjectID;
+
+            db.collection('persons')
+				.remove({'_id': ObjectId(person_id)});
+        },
 
     personAddGroup:
         function (person, group_id, group_name) {
