@@ -1,13 +1,17 @@
 <div class="row col-xs-12">
+  <button ng-click="ctrl.propertyName = null; ctrl.reverse = false">Set to unsorted</button>
     <table class="table table-hover">
         <tbody>
         <tr>
-            <th>Name</th>
+            <th>
+		<button ng-click="ctrl.sortBy('name')">Name</button>
+ 		<span class="sortorder" ng-show="propertyName === 'name'" ng-class="{reverse: reverse}"></span>
+	    </th>
             <th>Info</th>
             <th><span class="glyphicon glyphicon-ok"></span></th>
             <th><span class="glyphicon glyphicon-remove"></span></th>
         </tr>
-        <tr ng-repeat="group in ctrl.allGroups">
+        <tr ng-repeat="group in ctrl.allGroups | orderBy:ctrl.propertyName:ctrl.reverse">
             <td ng-bind="group.name" style="width: 55%;"></td>
             <td ng-bind="group.info" style="width: 55%;"></td>
             <td style="width: 4%;">
