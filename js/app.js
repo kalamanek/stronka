@@ -1,4 +1,4 @@
-var app = angular.module('app', ['ngRoute', 'ngCookies', 'ngWebSocket', 'ngAnimate', 'ui.bootstrap']);
+var app = angular.module('app', ['ngRoute', 'ngCookies', 'ngWebSocket', 'ngAnimate', 'ui.bootstrap','chart.js']);
 
 app.value('globals', { session: { _id: '', user: '' }, lastMessage: { from: '', message: '' } });
 
