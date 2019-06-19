@@ -4,6 +4,9 @@ app.controller('Page2', ['$http',
 
         self.userGroups = [];
         self.allGroups = {};
+	self.reverse=true;
+	self.propertyName = '';
+
 
         self.getAllGroups = function () {
             $http.get('/groups').then(
@@ -17,6 +20,11 @@ app.controller('Page2', ['$http',
                 }
             );
         }
+	self.sortBy =function(propertyName){
+	 this.reverse = (propertyName !== null && this.propertyName === propertyName)
+        ? !this.reverse : false;
+    	this.propertyName = propertyName;
+	}
 
        self.getUserGroups = function () {
             $http.get('/user/groups').then(

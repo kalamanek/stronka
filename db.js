@@ -6,18 +6,36 @@ var merge = require('merge');
 var mongojs = require('mongojs');
 var querystring = require('querystring');
 
+var crypto = require('crypto');
+
+function genRandomString (length){
+    return crypto.randomBytes(Math.ceil(length/2))
+            .toString('hex') /** convert to hexadecimal format */
+            .slice(0,length);   /** return required number of characters */
+};
+function sha512(password, salt){
+    var hash = crypto.createHmac('sha512', salt); /** Hashing algorithm sha512 */
+    hash.update(password);
+    var value = hash.digest('hex');
+    return {
+        salt:salt,
+        passwordHash:value
+    };
+};
+
 var db = mongojs(dbName);
 db.dropDatabase();
 module.exports = {
 	checkCredentials:
 		function(cred, callback) {
 			db.collection('persons')
-				.find({ email: cred.login,
-					password: cred.password })
+				.find({ email: cred.login})
 				.toArray(function(err, docs) {
-					callback(err || docs.length == 0 ? {} : docs[0]
-				);
-			});
+					console.log("compare password: "+docs[0].password+" with " +sha512(cred.password,docs[0].salt).passwordHash);
+					console.log("q: "+sha512("q","q").passwordHash+" a " +sha512("q","q").passwordHash);
+					callback((err || docs.length == 0 || docs[0].password !== sha512(cred.password,docs[0].salt).passwordHash )? {} : docs[0]);
+					
+				});
 		},
 
 	checkForUsedLogin:
@@ -31,11 +49,13 @@ module.exports = {
 
 	insertUser:
 		function(cred) {
+		cred.salt = genRandomString(15);
 			db.collection('persons')
 				.insert({ firstName: cred.firstName,
 					lastName: cred.lastName,
 					email: cred.email,
-					password: cred.password ,
+					password: sha512(cred.password, cred.salt).passwordHash,
+					salt: cred.salt,
 					groups: [] });
 		},
 
@@ -44,7 +64,7 @@ module.exports = {
 			db.collection('persons')
 				.find({_id: person_id})
 				.toArray(function(err, docs) {
-					callback(err ||docs[0].lenght == 0 ? {} :  docs[0]);
+					callback(err || docs.lenght == 0 ? {} :  docs[0]);
 				});
 		},
 				
@@ -53,7 +73,7 @@ module.exports = {
 			db.collection('persons')
 				.find()
 				.toArray(function(err, docs) {
-					callback(err ||docs[0].lenght == 0 ? {} :  docs);
+					callback(err ||docs.lenght == 0 ? {} :  docs);
 				});
 		},
 		

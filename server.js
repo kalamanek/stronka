@@ -63,7 +63,6 @@ function isLoggedIn(session) {
     return false;
 }
 
-
 function register(req, rep) {
     var item = '';
     req.setEncoding('utf8');
@@ -154,10 +153,7 @@ function logOut(req, rep, session) {
 	rep.writeHead(200, 'Session destroyed', { 'Content-Type': 'application/json' });
 	rep.write(JSON.stringify(sessions[session]));
 	if(session) {
-	    if(sessions[session].user) {
-			var user = sessions[session].user;
-			broadcast(session, 'User ' + user.firstName + ' ' + user.lastName + ' logged out');
-	    }
+		delete connections[sessions[session]._id];
 		delete sessions[session];
 	}
 	rep.end();
@@ -419,10 +415,6 @@ function changeUser(req, rep, session){
 			if(user._id == sessions[session]._id){
 				if(debugLog) console.log('Destroying session ' + session + ': ' + JSON.stringify(sessions[session]));
 				if(session) {
-					if(sessions[session].user) {
-						var user = sessions[session].user;
-						broadcast(session, 'User ' + user.firstName + ' ' + user.lastName + ' logged out');
-					}
 					delete sessions[session];
 				}
 			}
@@ -448,18 +440,15 @@ function  deleteUser(req, rep, session){
         try {
             var user = JSON.parse(item);
             if (debugLog) console.log('Trying to delete  user ' + JSON.stringify(user));
-
             db.removeUser(user._id);
-			if(user._id == sessions[session]._id){
-				if(debugLog) console.log('Destroying session ' + session + ': ' + JSON.stringify(sessions[session]));
-				if(session) {
-					if(sessions[session].user) {
-						var user = sessions[session].user;
-						broadcast(session, 'User ' + user.firstName + ' ' + user.lastName + ' logged out');
-					}
-					delete sessions[session];
-				}
-			}
+			
+			for(var client in sessions){
+				console.log('sprawdzam: ' + JSON.stringify(client) + " " +JSON.stringify(sessions[client]));
+				if(user._id == sessions[client]._id){
+					if(debugLog) console.log('Destroying session: ' + JSON.stringify(client));
+					delete sessions[client];
+				};
+			};
             rep.writeHead(200, 'Delete user', {'Content-Type': 'application/json'});
             rep.end(JSON.stringify({message: 'You have removed this person'}));
         } catch (e) {
@@ -665,6 +654,7 @@ httpServer.on('request', function (req, rep) {
 		}
 	}
 );
+var connections = [];
 
 wsServer.on('connection', function connection(conn) {
 	
@@ -674,12 +664,12 @@ wsServer.on('connection', function connection(conn) {
 		
 		var rep = { error: 'OK' };
 		try {
-			
 			msg = JSON.parse(message);
 			if(debugLog) console.log('Frontend sent by ws: ' + JSON.stringify(msg));
 			
-			if(msg.session && !conn.session) {
+			if(msg.session) {			
 				conn.session = msg.session;
+				connections[conn.session] = conn;
 				if(debugLog) console.log('WebSocket session set to ' + conn.session);
 			}
 			
@@ -691,16 +681,27 @@ wsServer.on('connection', function connection(conn) {
 		if(debugLog) console.log('My answer sent by ws: ' + JSON.stringify(rep));
 	
 	}).on('error', function(err) {});
+	
+	conn.on('close', function () { //TODO clean ws when needed
+		if(debugLog) console.log('closing ws: ' + conn.session);
+		if(conn.session)
+			delete conn.session;
+	});
+  
 });
 
 function broadcast(session, msg , group_id) {
 	db.getGroupPersons(group_id, function (data) {
-		wsServer.clients.forEach(function(client) {
-			if(client.readyState === WebSocket.OPEN && userBelongToGroup(data, client.session) == true) {
-				if(debugLog) console.log("Sending an event message to client " + client.session + " with data " + msg);
-				client.send(JSON.stringify({ from: sessions[session].firstName + " "  + sessions[session].lastName ,message: msg ,group_id: group_id,}));
+		//wsServer.clients.forEach(function(client) {
+		//	if(client.readyState === WebSocket.OPEN && userBelongToGroup(data, client.session) == true ) {
+		//		client.send(JSON.stringify({ from: sessions[session].firstName + " "  + sessions[session].lastName ,message: msg ,group_id: group_id }));
+		//	}
+		//});
+		for (var k in data){
+			if(connections[data[k]._id] && connections[data[k]._id].readyState === WebSocket.OPEN){
+				connections[data[k]._id].send(JSON.stringify({ from: sessions[session].firstName + " "  + sessions[session].lastName ,message: msg ,group_id: group_id }));
 			}
-		});
+		}
 	});
 }
 httpServer.listen(listeningPort);

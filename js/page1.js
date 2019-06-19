@@ -75,7 +75,8 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 						self.messageHolder.forEach((v,i) =>{
 							addMessageStart(self.messageHolder[i].name,self.messageHolder[i].text);
 						});
-						scrollElement.scrollTop = 100;
+						scrollElement.scrollTop = 20;
+						
 					} catch (err) {
 					}
 				},
@@ -155,7 +156,6 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 		self.gotoBottom = function(){
 				scrollElement.scrollTop = scrollElement.scrollHeight - scrollElement.clientHeight;
 		}		
-	
 		
 		
 		self.pushMsg = function(){ // TODO should reply that message seen and change color on server

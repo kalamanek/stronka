@@ -3,7 +3,8 @@ app.constant('routes', [
     {route: '/1',templateUrl: 'html/page1.html',controller: 'Page1',controllerAs: 'ctrl',menu: 'Current active Chats',onlyLoggedIn: true},
     {route: '/2',templateUrl: 'html/page2.html',controller: 'Page2',controllerAs: 'ctrl',menu: 'add/remove chat',onlyLoggedIn: true},
     {route: '/3',templateUrl: 'html/page3.html',controller: 'Page3',controllerAs: 'ctrl',menu: 'Admin manage users',onlyLoggedIn: true, showFor: 'Admin'},
-    {route: '/4',templateUrl: 'html/page4.html',controller: 'Page4',controllerAs: 'ctrl',menu: 'Admin manage chat',onlyLoggedIn: true, showFor: 'Admin'}
+    {route: '/4',templateUrl: 'html/page4.html',controller: 'Page4',controllerAs: 'ctrl',menu: 'Admin manage chat',onlyLoggedIn: true, showFor: 'Admin'},
+    {route: '/5',templateUrl: 'html/page5.html',controller: 'Page5',controllerAs: 'ctrl',menu: 'Admin user Graph',onlyLoggedIn: true, showFor: 'Admin'}
 ]);
 
 app.config(['$routeProvider', 'routes', function ($routeProvider, routes) {
@@ -21,7 +22,7 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
 		
 		self.lastMessage = globals.lastMessage;
 			
-		self.getSession = function (){
+		self.getSession = function (){ 
 		if(!globals.session._id) {
 			common.getSession(function (session) {
 				globals.session._id = session._id;
