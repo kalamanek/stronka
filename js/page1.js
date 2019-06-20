@@ -161,7 +161,6 @@ app.controller('Page1', ['$http', 'globals', 'ws',
 		self.pushMsg = function(){ // TODO should reply that message seen and change color on server
 			if(self.currentGroup._id === self.lastMessage.group_id){
 				addMessageEnd(self.lastMessage.from,self.lastMessage.message);
-				self.gotoBottom();
 			}else{
 				self.userGroups.forEach((v, i) => {
 					if(self.userGroups[i]._id === self.lastMessage.group_id){
