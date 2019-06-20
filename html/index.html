@@ -17,9 +17,9 @@
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
 </head>
+</script>
 
 <body class="ng-scope top-buffer" ng-controller="Menu as ctrl">
-
 <div class="container">
 
     <ng-include src="'html/login.html'"></ng-include>
@@ -28,7 +28,7 @@
     <div class="navbar navbar-default navbar-fixed-top">
 	<style type="text/css">
 		body {
-			padding-top: 60px;
+			padding-top: 40px;
 		}
 	</style>
         <div class="container-fluid"> 
@@ -46,10 +46,15 @@
                 <ul class="nav navbar-nav navbar-right">
                     <li ng-show="ctrl.loggedUser"><a href="#/" ng-click="ctrl.confirmLogOut()">{{ctrl.loggedName}} <span
                             class="glyphicon glyphicon-log-out"></span></a></li>
-                    <li ng-hide="ctrl.loggedUser"><a href="#/" ng-click="ctrl.register()">Register <span
+                  
+				  <li ng-hide="ctrl.loggedUser"><a href="#/" ng-click="ctrl.register()">Register <span
                             class="glyphicon glyphicon-plus-sign"></span></a></li>
-                    <li ng-hide="ctrl.loggedUser"><a href="#/" ng-click="ctrl.logIn()">Login <span
-                            class="glyphicon glyphicon-log-in"></span></a></li>
+							
+					<li ng-hide="ctrl.loggedUser">
+						<a href="#/" ng-click="ctrl.logIn()">Login 
+						<span class="glyphicon glyphicon-log-in"></span></a>
+					</li>	
+				
                 </ul>
             </div>
         </div>
@@ -75,8 +80,8 @@
 <script src="/js/page5.js"></script>
 <script src="/js/menu.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.bundle.js"></script>
-<script src="//cdn.jsdelivr.net/angular.chartjs/latest/angular-chart.min.js"></script>
+<script src="/js/Chart.js"></script>
+<script src="/js/angular-chart.js"></script>
 
 </body>
 </html>

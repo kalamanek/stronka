@@ -31,9 +31,10 @@ module.exports = {
 			db.collection('persons')
 				.find({ email: cred.login})
 				.toArray(function(err, docs) {
-					console.log("compare password: "+docs[0].password+" with " +sha512(cred.password,docs[0].salt).passwordHash);
-					console.log("q: "+sha512("q","q").passwordHash+" a " +sha512("q","q").passwordHash);
-					callback((err || docs.length == 0 || docs[0].password !== sha512(cred.password,docs[0].salt).passwordHash )? {} : docs[0]);
+					//console.log("compare password: "+docs[0].password+" with " +sha512(cred.password,docs[0].salt).passwordHash);
+					callback(((err || docs.length == 0 ) ? {} : 
+						(docs[0].password !== sha512(cred.password,docs[0].salt).passwordHash ) ? {} : docs[0]) 
+					);
 					
 				});
 		},
@@ -80,15 +81,29 @@ module.exports = {
 	updateUser:
 		function(user){
 		var ObjectId = require('mongodb').ObjectID;
-		 db.collection('persons')
+		if(user.password){
+			user.salt = genRandomString(15);
+			db.collection('persons')
 				.update({_id: ObjectId(user._id)}, {$set: {
 					firstName: user.firstName,
 					lastName: user.lastName,
 					email: user.email,
-					password: user.password ,
+					password: sha512(user.password, user.salt).passwordHash ,
+					groups: user.groups ,
+					role: user.role,
+					salt: user.salt
+				}})
+		}else{
+			db.collection('persons')
+				.update({_id: ObjectId(user._id)}, {$set: {
+					firstName: user.firstName,
+					lastName: user.lastName,
+					email: user.email,
 					groups: user.groups ,
 					role: user.role
 				}})
+		}
+		
 		},
 
 

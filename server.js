@@ -388,6 +388,8 @@ function userBelongToGroup(data,client_id){
 }
 function getAllUsers(req, rep, session){
 	db.selectAllUsers(function (users) {
+		for(var user in users)
+			delete users[user].password;
         rep.writeHead(200, 'users', {'Content-Type': 'application/json'});
         rep.end(JSON.stringify(users));
     });
@@ -446,6 +448,7 @@ function  deleteUser(req, rep, session){
 				console.log('sprawdzam: ' + JSON.stringify(client) + " " +JSON.stringify(sessions[client]));
 				if(user._id == sessions[client]._id){
 					if(debugLog) console.log('Destroying session: ' + JSON.stringify(client));
+				//	if(connections[user._id])delete connections[user._id];
 					delete sessions[client];
 				};
 			};

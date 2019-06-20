@@ -20,10 +20,12 @@ app.controller('Page3', ['$http', 'globals', 'ws',
 		
 		self.giveAdmin = function(user){
 			user.role="Admin";
+			delete user.password;
 			self.updateUser(user);
 		}	
 		self.removeAdmin = function(user){
 			delete user.role;
+			delete user.password;
 			self.updateUser(user);
 		}	
 		self.removeUser = function(user){

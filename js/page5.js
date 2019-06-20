@@ -11,10 +11,10 @@ app.controller('Page5', ['$http', 'globals', 'ws',
                     try {
                         self.allGroups = rep.data;
 						for (let k in self.allGroups) {
-						self.labels.push(self.allGroups[k].name);
 						$http.put('/admin/groupusers', {_id: self.allGroups[k]._id}).then(
 							function (rep) {
 								try {
+									self.labels.push(self.allGroups[k].name);
 									self.data.push(typeof rep.data.length == "undefined" ? 0 :rep.data.length );
 								} catch (err) {
 								}
