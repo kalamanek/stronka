@@ -25,7 +25,7 @@ groupsExample = [
     {name: 'Muzyka', info: 'Grupa o muzyce'},
     {name: 'Gry', info: 'Grupa o grach'},
     {name: 'Boks', info: 'Grupa o boksie'},
-    {name: 'Anonimowi Alkoholicy', info: 'Grupa o ...'},
+    {name: 'Anonimowi pracoholicy', info: 'Grupa o ...'}
 ];
 
 
@@ -44,3 +44,5 @@ for (var i in groupsExample) {
     }
     groups.insert(groupsExample[i]);
 }
+
+

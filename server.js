@@ -2,11 +2,15 @@ var fs = require('fs');
 var http = require('http');
 var path = require('path');
 var mime = require('mime');
-var Cookies = require('cookies');
 var uuid = require('uuid');
 var WebSocket = require('ws');
 var fileSystem = require("fs");
 var scope = require('scope');
+
+
+var Cookies = require('cookies');
+
+
 
 require('./initialize.js');
 
@@ -388,8 +392,10 @@ function userBelongToGroup(data,client_id){
 }
 function getAllUsers(req, rep, session){
 	db.selectAllUsers(function (users) {
-		for(var user in users)
+		for(var user in users){
 			delete users[user].password;
+			delete users[user].salt;
+		}
         rep.writeHead(200, 'users', {'Content-Type': 'application/json'});
         rep.end(JSON.stringify(users));
     });
