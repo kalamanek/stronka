@@ -3,11 +3,10 @@ var app = angular.module('app', ['ngRoute', 'ngCookies', 'ngWebSocket', 'ngAnima
 app.value('globals', { session: { _id: '', user: '' }, lastMessage: { from: '', message: '' } });
 
 app.service('common', ['$http', 'globals', function($http, globals) {
-
 	this.getSession = function(callback) {
 		$http.get('/auth').then(
 			function(response) {
-				if(!globals.session) {
+				if(!globals.session._id) {
 					console.log(response.data);
 					globals.session = response.data;
 				}
@@ -18,8 +17,6 @@ app.service('common', ['$http', 'globals', function($http, globals) {
 			}
 		);
 	}
-
-	
 }]);
 
 app.factory('ws', ['$websocket', 'globals', function($websocket, globals) {
