@@ -25,7 +25,6 @@ app.controller('Menu', ['$http', '$location', '$cookies', 'common', 'globals', '
 		self.getSession = function (){ 
 		if(!globals.session._id) {
 			common.getSession(function (session) {
-				globals.session._id = session._id;
 				self.loggedUser = session.login;
 				self.loggedName = session.firstName + ' ' + session.lastName;
 				self.role = session.role;
