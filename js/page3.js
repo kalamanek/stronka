@@ -33,6 +33,9 @@ app.controller('Page3', ['$http', 'globals', 'ws',
                 function (rep) {
                     try {
 						console.log(rep);
+			    			if(user._id == globals.session._id){
+							window.location.reload(false);
+						}
                     } catch (err) {
                     }
                 },
